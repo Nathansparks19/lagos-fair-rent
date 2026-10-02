@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+.DS_Store
+data/lagos_rent_2022.csv
+data/lagos_rent_clean.csv

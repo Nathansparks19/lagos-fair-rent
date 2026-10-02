@@ -1,0 +1,100 @@
+{
+  "areas": {
+    "Ajah": [
+      "Ado",
+      "Badore",
+      "Lekki Scheme",
+      "Other Ajah",
+      "Sangotedo"
+    ],
+    "Gbagada": [
+      "Gbagada Phase 1",
+      "Gbagada Phase 2",
+      "Ifako",
+      "Medina",
+      "Millennium Ups",
+      "Other Gbagada",
+      "Oworonshoki",
+      "Soluyi"
+    ],
+    "Ikeja": [
+      "Adeniyi Jones",
+      "Alausa",
+      "Allen Avenue",
+      "Awolowo Way",
+      "Gra",
+      "Opebi",
+      "Oregun",
+      "Other Ikeja",
+      "Toyin Street"
+    ],
+    "Ikoyi": [
+      "Awolowo Road",
+      "Banana Island",
+      "Bourdillon",
+      "Dolphin Estate",
+      "Old Ikoyi",
+      "Osborne Foreshore Estate",
+      "Other Ikoyi",
+      "Parkview Estate"
+    ],
+    "Island": [
+      "1004",
+      "Adeola Odeku",
+      "Ligali Ayorinde",
+      "Oniru",
+      "Other Victoria Island",
+      "Victoria Island Extension"
+    ],
+    "Lekki": [
+      "Agungi",
+      "Chevron",
+      "Ikate",
+      "Ikota",
+      "Lekki Phase 1",
+      "Ologolo",
+      "Osapa London",
+      "Other Lekki"
+    ],
+    "Ojodu": [
+      "Isheri North",
+      "Magodo Gra Phase 1",
+      "Ojodu Berger",
+      "Olowora",
+      "Omole Phase 1",
+      "Omole Phase 2",
+      "Other Ojodu"
+    ],
+    "Surulere": [
+      "Adelabu",
+      "Aguda",
+      "Bode Thomas",
+      "Ijesha",
+      "Lawanson",
+      "Marsha",
+      "Ogunlana",
+      "Ojuelegba",
+      "Other Surulere",
+      "Randle Avenue"
+    ],
+    "Yaba": [
+      "Agoro",
+      "Akoka",
+      "Alagomeji",
+      "Ebute-Metta",
+      "Ijesha",
+      "Jibowu",
+      "Onike",
+      "Other Yaba",
+      "Sabo"
+    ]
+  },
+  "property_types": [
+    "duplex",
+    "flat",
+    "house",
+    "room",
+    "self_contain"
+  ],
+  "min_listings": 10
+}
