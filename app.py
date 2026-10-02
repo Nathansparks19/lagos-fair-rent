@@ -6,7 +6,7 @@ Loads   models/rent_model.joblib   (from train_model.py)
 
 Run it locally from the project folder with:
     uvicorn app:app --reload
-Then open http://127.0.0.1:8000/docs to try it in your browser.
+Then open http://127.0.0.1:8000 for the demo page, or /docs for the technical API page.
 """
 
 import json
@@ -17,6 +17,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -131,6 +132,16 @@ def make_verdict(price, q10, q25, q75, q90):
     if price >= q10:
         return "below typical", "This is cheaper than most similar homes in this area."
     return "well below typical", "This is far below what similar homes usually cost. Inspect the property in person and never pay before viewing it, as unusually cheap listings can be scams."
+
+
+DEMO_PATH = os.getenv("DEMO_PATH", "static/index.html")
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def demo_page():
+    """The public demo: a form that calls /options and /estimate on this same server."""
+    with open(DEMO_PATH, encoding="utf-8") as f:
+        return f.read()
 
 
 @app.get("/health")

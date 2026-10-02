@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lagos Fair Rent: is this rent fair?</title>
+<meta name="description" content="Check whether a Lagos asking rent is fair. A machine-learning model trained on 49,279 Lagos rent listings estimates the typical range for similar homes." />
+<meta property="og:title" content="Lagos Fair Rent: is this rent fair?" />
+<meta property="og:description" content="A machine-learning model trained on 49,279 Lagos listings estimates the typical rent for similar homes." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E6B4A'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='Arial' font-size='30' font-weight='700' fill='white'%3E%E2%82%A6%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --green: #1E6B4A; --green-dark: #14231C; --mint: #E5EFE8;
+    --ink: #14231C; --muted: #56635C; --line: #D9DFDA; --paper: #FFFFFF; --wash: #F5F7F5;
+    --low: #2F6FB0; --typical: #1E6B4A; --high: #B7791F; --very-high: #B42318;
+    --font: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); color: var(--ink); background: var(--paper); font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: var(--green); }
+  :focus-visible { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 4px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 48px); }
+
+  header { border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; height: 64px; }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+  .by { font-size: 14px; color: var(--muted); }
+  .by a { color: var(--ink); }
+
+  .intro { padding: clamp(40px, 6vw, 72px) 0 clamp(24px, 4vw, 40px); }
+  h1 { font-size: clamp(36px, 5.5vw, 60px); line-height: 1.04; letter-spacing: -0.035em; margin: 0; max-width: 15ch; }
+  .lead { margin: 18px 0 0; font-size: clamp(17px, 1.7vw, 20px); color: var(--muted); max-width: 54ch; }
+  .notice { margin-top: 20px; display: inline-block; padding: 10px 14px; border-radius: 10px; background: #FFF7E6; color: #6B4A0E; font-size: 15px; }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: clamp(24px, 4vw, 48px); align-items: start; padding-bottom: clamp(56px, 8vw, 96px); }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  form { border: 2px solid var(--line); border-radius: 20px; padding: clamp(20px, 3vw, 32px); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+  label, .label { display: block; font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+  .hint { font-weight: 400; color: var(--muted); }
+  select, input[type=text] {
+    width: 100%; margin-bottom: 18px; font: 400 16px/1.4 var(--font); color: var(--ink);
+    padding: 12px 14px; border: 2px solid var(--line); border-radius: 10px; background: #fff;
+  }
+  select {
+    -webkit-appearance: none; appearance: none; padding-right: 40px; cursor: pointer;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%2314231C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center / 16px;
+  }
+  select:focus, input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 4px var(--mint); }
+  .checks { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 20px; }
+  .check { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border: 2px solid var(--line); border-radius: 999px; font-size: 15px; cursor: pointer; user-select: none; }
+  .check:has(input:checked) { border-color: var(--green); background: var(--mint); }
+  .check input { accent-color: var(--green); width: 16px; height: 16px; margin: 0; }
+  .money { position: relative; }
+  .money span { position: absolute; left: 14px; top: 12px; color: var(--muted); font-size: 16px; }
+  .money input { padding-left: 32px; }
+  button[type=submit] {
+    width: 100%; font: 700 17px/1 var(--font); color: #fff; background: var(--green);
+    border: 0; border-radius: 12px; padding: 17px; cursor: pointer;
+  }
+  button[type=submit]:hover { background: #17573C; }
+  button[type=submit]:disabled { opacity: .6; cursor: progress; }
+
+  .result { border-radius: 20px; background: var(--wash); padding: clamp(20px, 3vw, 32px); min-height: 100%; }
+  .empty { color: var(--muted); }
+  .empty h2 { color: var(--ink); font-size: 22px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .verdict { display: inline-block; font-weight: 700; font-size: 15px; padding: 7px 14px; border-radius: 999px; color: #fff; margin-bottom: 14px; }
+  .v-low { background: var(--low); } .v-typical { background: var(--typical); } .v-high { background: var(--high); } .v-very-high { background: var(--very-high); }
+  .range-label { margin: 0; font-size: 15px; color: var(--muted); }
+  .range { margin: 4px 0 0; font-size: clamp(28px, 3.6vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .message { margin: 14px 0 0; font-size: 17px; }
+
+  .chart { margin: 32px 0 8px; position: relative; height: 92px; }
+  .track { position: absolute; left: 0; right: 0; top: 40px; height: 14px; border-radius: 7px; background: #E2E8E3; }
+  .wide { position: absolute; top: 40px; height: 14px; border-radius: 7px; background: #BFD6C7; }
+  .typical { position: absolute; top: 36px; height: 22px; border-radius: 6px; background: var(--green); }
+  .pin { position: absolute; top: 0; transform: translateX(-50%); text-align: center; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .pin::after { content: ""; display: block; width: 3px; height: 50px; margin: 4px auto 0; background: currentColor; border-radius: 2px; }
+  .pin.asking { color: var(--ink); }
+  .pin.edge-left { transform: translateX(-1.5px); text-align: left; }
+  .pin.edge-left::after { margin-left: 0; }
+  .pin.edge-right { transform: translateX(calc(-100% + 1.5px)); text-align: right; }
+  .pin.edge-right::after { margin-right: 0; }
+  .scale { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+
+  dl.figures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 24px 0 0; }
+  dl.figures div { background: #fff; border-radius: 12px; padding: 12px 14px; }
+  dl.figures dt { font-size: 13px; color: var(--muted); }
+  dl.figures dd { margin: 2px 0 0; font-weight: 700; font-size: 17px; }
+  @media (max-width: 480px) { dl.figures { grid-template-columns: 1fr; } }
+
+  .note { margin: 20px 0 0; font-size: 14px; color: var(--muted); }
+  .error { color: var(--very-high); font-weight: 600; }
+  .waking { margin: 0 0 16px; font-size: 15px; color: var(--muted); }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 15px; color: var(--muted); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+  footer p { margin: 0; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <span class="brand">Lagos Fair Rent</span>
+    <span class="by">A project by <a href="https://nathansparks.dev">Nwankwonta Chiemena</a></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <h1>Is this rent fair?</h1>
+    <p class="lead">
+      Describe a home in Lagos and see what similar homes usually cost. The estimate comes from a
+      machine-learning model trained on 49,279 real rent listings.
+    </p>
+    <p class="notice"><strong>Prices are 2022 levels.</strong> Rents have risen since, so use this to compare homes, not as today’s price.</p>
+  </section>
+
+  <div class="grid">
+    <form id="form" novalidate>
+      <p class="waking" id="waking" hidden>Starting the server. The first visit after a quiet spell can take up to a minute.</p>
+
+      <div class="row">
+        <div>
+          <label for="area">Area</label>
+          <select id="area" required><option value="">Loading…</option></select>
+        </div>
+        <div>
+          <label for="neighbourhood">Neighbourhood <span class="hint">(optional)</span></label>
+          <select id="neighbourhood"><option value="">Not sure</option></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="type">Type of home</label>
+          <select id="type"></select>
+        </div>
+        <div>
+          <label for="bedrooms">Bedrooms</label>
+          <select id="bedrooms"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="bathrooms">Bathrooms <span class="hint">(optional)</span></label>
+          <select id="bathrooms"><option value="">Not sure</option></select>
+        </div>
+        <div>
+          <label for="asking">Asking rent per year <span class="hint">(optional)</span></label>
+          <div class="money"><span>₦</span><input id="asking" type="text" inputmode="numeric" placeholder="2,500,000" autocomplete="off" /></div>
+        </div>
+      </div>
+
+      <span class="label">Features</span>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="serviced" /> Serviced</label>
+        <label class="check"><input type="checkbox" id="newly_built" /> Newly built</label>
+        <label class="check"><input type="checkbox" id="furnished" /> Furnished</label>
+      </div>
+
+      <button type="submit" id="submit">Check the rent</button>
+    </form>
+
+    <section class="result" id="result" aria-live="polite">
+      <div class="empty">
+        <h2>Your estimate will appear here</h2>
+        <p>Choose an area and the type of home. Add the asking rent to see whether it’s typical, high or low for similar homes.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Model: gradient boosting with calibrated ranges. Median error on unseen listings: 23%.</p>
+    <p><a href="https://github.com/Nathansparks19/lagos-fair-rent">How it was built</a> · <a href="/docs">API</a></p>
+  </div>
+</footer>
+
+<script>
+const TYPE_LABELS = { flat: 'Flat or apartment', duplex: 'Duplex', house: 'House or bungalow', self_contain: 'Self-contain', room: 'Room' };
+const VERDICTS = {
+  'well below typical': ['Well below typical', 'v-low'],
+  'below typical': ['Below typical', 'v-low'],
+  'typical': ['Typical', 'v-typical'],
+  'above typical': ['Above typical', 'v-high'],
+  'well above typical': ['Well above typical', 'v-very-high'],
+};
+const $ = id => document.getElementById(id);
+const naira = n => '₦' + Math.round(n).toLocaleString('en-NG');
+const short = n => n >= 1e6 ? '₦' + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'm' : '₦' + Math.round(n / 1e3) + 'k';
+let options = null;
+
+function fill(select, items, keepFirst = false) {
+  const first = keepFirst ? select.options[0].outerHTML : '';
+  select.innerHTML = first + items.map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+}
+
+function updateBedrooms() {
+  const isStudio = $('type').value === 'self_contain';
+  const counts = isStudio ? [0, 1] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const current = $('bedrooms').value;
+  fill($('bedrooms'), counts.map(n => [n, n === 0 ? 'Studio (0)' : n]));
+  $('bedrooms').value = counts.includes(Number(current)) ? current : (isStudio ? 0 : 2);
+}
+
+async function loadOptions() {
+  const slow = setTimeout(() => { $('waking').hidden = false; }, 2500);
+  try {
+    const res = await fetch('/options');
+    options = await res.json();
+    fill($('area'), [['', 'Choose an area'], ...Object.keys(options.areas).map(a => [a, a])]);
+    const types = options.property_types.filter(t => TYPE_LABELS[t]);
+    fill($('type'), types.map(t => [t, TYPE_LABELS[t]]));
+    $('type').value = types.includes('flat') ? 'flat' : types[0];
+    fill($('bathrooms'), [1, 2, 3, 4, 5, 6, 7, 8].map(n => [n, n]), true);
+    updateBedrooms();
+  } catch {
+    $('area').innerHTML = '<option value="">Could not load areas</option>';
+    $('result').innerHTML = '<p class="error">The server didn’t respond. Refresh the page in a moment.</p>';
+  } finally {
+    clearTimeout(slow);
+    $('waking').hidden = true;
+  }
+}
+
+$('area').addEventListener('change', () => {
+  const hoods = (options && options.areas[$('area').value]) || [];
+  fill($('neighbourhood'), [['', 'Not sure'], ...hoods.map(h => [h, h])]);
+});
+$('type').addEventListener('change', updateBedrooms);
+$('asking').addEventListener('input', e => {
+  const digits = e.target.value.replace(/\D/g, '');
+  e.target.value = digits ? Number(digits).toLocaleString('en-NG') : '';
+});
+
+function render(r, asking) {
+  const lo = Math.min(r.wide_low, asking || Infinity) * 0.9;
+  const hi = Math.max(r.wide_high, asking || 0) * 1.08;
+  const pct = v => (v - lo) / (hi - lo) * 100;
+  const pos = v => pct(v).toFixed(2) + '%';
+  const edge = asking ? (pct(asking) < 15 ? 'edge-left' : pct(asking) > 85 ? 'edge-right' : '') : '';
+  const [label, cls] = r.verdict ? VERDICTS[r.verdict] : [null, null];
+
+  $('result').innerHTML = `
+    ${label ? `<span class="verdict ${cls}">${label}</span>` : ''}
+    <p class="range-label">Typical rent for similar homes</p>
+    <p class="range">${naira(r.typical_low)} – ${naira(r.typical_high)} <span style="font-size:.45em;font-weight:600;color:var(--muted)">a year</span></p>
+    ${r.verdict_message ? `<p class="message">${r.verdict_message}</p>` : ''}
+
+    <div class="chart" role="img" aria-label="Typical range ${naira(r.typical_low)} to ${naira(r.typical_high)}${asking ? ', asking rent ' + naira(asking) : ''}">
+      <div class="track"></div>
+      <div class="wide" style="left:${pos(r.wide_low)};width:calc(${pos(r.wide_high)} - ${pos(r.wide_low)})"></div>
+      <div class="typical" style="left:${pos(r.typical_low)};width:calc(${pos(r.typical_high)} - ${pos(r.typical_low)})"></div>
+      ${asking ? `<div class="pin asking ${edge}" style="left:${pos(asking)}">Asking ${short(asking)}</div>` : ''}
+    </div>
+    <div class="scale"><span>${short(lo)}</span><span>${short(hi)}</span></div>
+
+    <dl class="figures">
+      <div><dt>Best single estimate</dt><dd>${naira(r.best_guess)}</dd></div>
+      <div><dt>Middle half of homes</dt><dd>${short(r.typical_low)} – ${short(r.typical_high)}</dd></div>
+      <div><dt>8 in 10 homes</dt><dd>${short(r.wide_low)} – ${short(r.wide_high)}</dd></div>
+    </dl>
+    ${r.reliability_note ? `<p class="note"><strong>Note:</strong> ${r.reliability_note}</p>` : ''}
+    <p class="note">Based on ${r.data_year} Lagos listings. Dark green shows where the middle half of similar homes fall, light green where 8 in 10 fall.</p>`;
+}
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!$('area').value) {
+    $('result').innerHTML = '<p class="error">Choose an area first.</p>';
+    $('area').focus();
+    return;
+  }
+  const asking = Number($('asking').value.replace(/\D/g, '')) || null;
+  const body = {
+    area: $('area').value,
+    neighbourhood: $('neighbourhood').value || null,
+    property_type: $('type').value,
+    bedrooms: Number($('bedrooms').value),
+    bathrooms: $('bathrooms').value ? Number($('bathrooms').value) : null,
+    serviced: $('serviced').checked,
+    newly_built: $('newly_built').checked,
+    furnished: $('furnished').checked,
+    asking_rent: asking,
+  };
+  $('submit').disabled = true;
+  $('submit').textContent = 'Checking…';
+  try {
+    const res = await fetch('/estimate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Check the details and try again.');
+    render(data, asking);
+  } catch (err) {
+    $('result').innerHTML = `<p class="error">${err.message || 'The estimate didn’t load. Try again in a moment.'}</p>`;
+  } finally {
+    $('submit').disabled = false;
+    $('submit').textContent = 'Check the rent';
+  }
+});
+
+loadOptions();
+</script>
+</body>
+</html>
